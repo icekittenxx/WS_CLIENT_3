@@ -1,18 +1,37 @@
 #include "http_request.h"
 
-int construct_http(const char *IpAddress, u_short Port, int PostAction, char *SendBuffer, char *FilePathName, int UPLOAD_TYPE){
+#include <uma/bson/Object.h>
+#include <uma/bson/ODMObject.h>
+#include <uma/bson/Document.h>
+#include <uma/bson/Array.h>
+#include <uma/bson/String.h>
+#include <uma/bson/Integer.h>
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <vector>
+
+using uma::bson::Object;
+using uma::bson::ODMObject;
+using uma::bson::Document;
+using uma::bson::Array;
+using uma::bson::String;
+using uma::bson::Integer;
+
+int construct_http(const char *IpAddress, u_short Port, int PostAction, char *SendBuffer, char *UserName, char *Password, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE){
 	char HttpHeader[SOCKET_MAX_BUF];
 	int HttpHeaderLen = 0, HttpContentLen = 0;
 
 	memset(SendBuffer, 0x00, sizeof SendBuffer);
 	memset(HttpHeader, 0x00, sizeof HttpHeader);
 
-	HttpContentLen = construct_http_content(PostAction, SendBuffer, FilePathName, UPLOAD_TYPE);
+	HttpContentLen = construct_http_content(PostAction, SendBuffer, UserName, Password, FilePath, FilePathAndFileName, UPLOAD_TYPE);
 	HttpHeaderLen = construct_http_header(IpAddress, Port, PostAction, HttpHeader, HttpContentLen);
 
 	memmove(SendBuffer + HttpHeaderLen, SendBuffer, HttpContentLen);
 	memcpy(SendBuffer, HttpHeader, HttpHeaderLen);
-
+	
 	return 0;
 }
 
@@ -24,7 +43,7 @@ int construct_http_header(const char *IpAddress, u_short Port, int PostAction, c
 
 	switch(PostAction){
 	case POST_API_ACTION_INIT:
-		strcat(HttpHeader, "POST /api/init");
+		strcat(HttpHeader, "POST /api/login");
 		break;
 	case POST_API_ACTION_UPLOAD:
 		strcat(HttpHeader, "POST /api/upload");
@@ -58,6 +77,85 @@ int construct_http_header(const char *IpAddress, u_short Port, int PostAction, c
 	return len;
 }
 
+int construct_http_content(int PostAction, char *SendBuffer, char *UserName, char *Password, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE){
+	char DEVID[MARK_MAX_BUF], SIG[MARK_MAX_BUF];
+	int VER, SOURCE, NONCE, ACTION;
+
+	using std::cout;
+	using std::endl;
+	using std::string;
+
+	using std::ostream;
+	using std::filebuf;
+	using std::ostringstream;
+	using std::stringstream;
+	using std::iostream;
+	
+	uma::bson::Document http_content;
+	uma::bson::Document bson_email_data;
+
+	http_content.set("devid", (string)DEVID);
+	http_content.set("ver", VER);
+	http_content.set("source", SOURCE);
+	http_content.set("action", ACTION);
+	http_content.set("nonce", NONCE);
+	http_content.set("sig", (string)SIG);
+
+	switch(PostAction){
+	case POST_API_ACTION_INIT:
+		http_content.set("username", (string)UserName);
+		http_content.set("password", (string)Password);
+		break;
+	case POST_API_ACTION_UPLOAD:
+		construct_http_content_upload(SendBuffer, FilePathAndFileName);
+
+		bson_email_data.set("folder", (string)FilePath);
+		bson_email_data.set("content", (string)SendBuffer);
+		http_content.set("data", bson_email_data);
+		
+		break;
+	case POST_API_ACTION_COMM:
+		break;
+	case POST_API_ACTION_CONFIG:
+		break;
+	case POST_API_ACTION_DOWNLOAD:
+		break;
+	case POST_API_ACTION_INSTALL:
+		break;
+	}
+
+	ostringstream stream_buf;
+	http_content.toBson(stream_buf);
+	string string_buf;
+	string_buf = stream_buf.str();
+	int buf_len;
+	buf_len = string_buf.size();
+
+	memset(SendBuffer, 0x00, sizeof SendBuffer);
+	memcpy(SendBuffer, string_buf.c_str(), buf_len);
+
+	return buf_len;
+}
+
+int construct_http_content_upload(char *SendBuffer, char *FilePathAndFileName){
+	FILE *PFile = NULL;
+	char InBuffer[SOCKET_MAX_BUF];
+
+	memset(InBuffer, 0x00, sizeof InBuffer);
+	
+	PFile = fopen(FilePathAndFileName, "r");
+	if(PFile == NULL){
+		return -1;
+	}
+	else{
+		while(fgets(InBuffer, SOCKET_MAX_BUF, PFile)){
+			strcat(SendBuffer, InBuffer);
+			return 0;
+		}
+	}
+}
+
+/*
 int construct_http_content(int PostAction, char *SendBuffer, char *FilePathName, int UPLOAD_TYPE){
 
 	char HttpContentHeader[SOCKET_MAX_BUF];
@@ -95,14 +193,13 @@ int construct_http_content(int PostAction, char *SendBuffer, char *FilePathName,
 }
 
 int construct_http_content_header(int PostAction, char *HttpContentHeader){
-	/*
-	0:	GUID
-	1:	VER
-	2:	SOURCE
-	3:	ACTION
-	4:	NONCE
-	5:	SIG
-	*/
+	//0:	GUID
+	//1:	VER
+	//2:	SOURCE
+	//3:	ACTION
+	//4:	NONCE
+	//5:	SIG
+	
 	char MarkName[MARK_MAX_NUMBER][MARK_MAX_BUF] = {"devid", "ver", "source", "action", "nonce", "sig"};
 	char Mark[MARK_MAX_NUMBER][MARK_MAX_BUF];
 
@@ -176,3 +273,4 @@ int construct_http_content_upload(char *SendBuffer, char *FilePathName, int UPLO
 
 	strcat(SendBuffer, "},\r\n]\r\n");
 }
+*/

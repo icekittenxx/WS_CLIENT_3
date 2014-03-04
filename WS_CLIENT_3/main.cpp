@@ -1,6 +1,6 @@
 #include "define.h"
 #include "post_api_comm.h"
-#include "post_api_init.h"
+#include "post_api_login.h"
 #include "post_api_upload.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -12,7 +12,7 @@ char SendBuffer[FILE_MAX_BUF];
 int main(){
 	int CommandId = 0;
 
-	post_api_init(IPAddress, Port, SendBuffer);
+	post_api_login(IPAddress, Port, SendBuffer, "test", "test");
 
 	while(~scanf("%d", &CommandId)){
 		printf("the program is running");

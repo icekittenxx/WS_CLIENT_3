@@ -12,7 +12,7 @@ int post_api_upload(const char *IpAddress, u_short Port, char *SendBuffer){
 	char FindFileClass[FILE_NAME_LEN];
 	int FindFileClassLen = 0;
 	char FileName[FILE_NAME_LEN];
-	char FilePathName[FILE_NAME_LEN];
+	char FilePathAndFileName[FILE_NAME_LEN];
 	int Res = 0;
 	
 	memset(CurrentPath, 0x00, sizeof CurrentPath);
@@ -44,12 +44,12 @@ int post_api_upload(const char *IpAddress, u_short Port, char *SendBuffer){
 				continue;
 			}
 
-			memset(FilePathName, 0x00, sizeof FilePathName);
-			strcat(FilePathName, CurrentPath);
-			strcat(FilePathName, EmlPath);
-			strcat(FilePathName, FindFile.name);
+			memset(FilePathAndFileName, 0x00, sizeof FilePathAndFileName);
+			strcat(FilePathAndFileName, CurrentPath);
+			strcat(FilePathAndFileName, EmlPath);
+			strcat(FilePathAndFileName, FindFile.name);
 
-			Res = post_api_upload_connect(IpAddress, Port, SendBuffer, FilePathName, UPLOAD_TYPE_EMAIL);
+			Res = post_api_upload_connect(IpAddress, Port, SendBuffer, CurrentPath, FilePathAndFileName, UPLOAD_TYPE_EMAIL);
 		}while(_findnext(FHandle, &FindFile) == 0);
 		_findclose(FHandle);
 	}
@@ -57,7 +57,7 @@ int post_api_upload(const char *IpAddress, u_short Port, char *SendBuffer){
 	return 0;
 }
 
-int post_api_upload_connect(const char *IpAddress, u_short Port, char *SendBuffer, char *FilePathName, int UPLOAD_TYPE){
+int post_api_upload_connect(const char *IpAddress, u_short Port, char *SendBuffer, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE){
 	WSADATA  Ws;
 	SOCKET ClientSocket;
 	HANDLE hThread = NULL;
@@ -84,7 +84,7 @@ int post_api_upload_connect(const char *IpAddress, u_short Port, char *SendBuffe
 		return -1;
 	}
 
-	Ret = post_api_upload_communcation(ClientSocket, IpAddress, Port, SendBuffer, FilePathName, UPLOAD_TYPE);
+	Ret = post_api_upload_communcation(ClientSocket, IpAddress, Port, SendBuffer, FilePath, FilePathAndFileName, UPLOAD_TYPE);
 	if(Ret == -1){
 		return -1;
 	}
@@ -94,7 +94,7 @@ int post_api_upload_connect(const char *IpAddress, u_short Port, char *SendBuffe
 	return 0;
 }
 
-int post_api_upload_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer, char *FilePathName, int UPLOAD_TYPE){
+int post_api_upload_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE){
 	//char *SendBuffer, *RecvBuffer;
 	char RecvBuffer[SOCKET_MAX_BUF];
 	int SendRes = 0, RecvRes = 0;
@@ -102,7 +102,7 @@ int post_api_upload_communcation(SOCKET ClientSocket, const char *IpAddress, u_s
 	int RecvBufferIsEmpty = 0;
 	int ParseRes = 0;
 
-	construct_http(IpAddress, Port, POST_API_ACTION_INIT, SendBuffer, FilePathName, UPLOAD_TYPE);
+	construct_http(IpAddress, Port, POST_API_ACTION_INIT, SendBuffer, NULL, NULL, FilePath, FilePathAndFileName, UPLOAD_TYPE);
 
 	SendRes = send(ClientSocket, SendBuffer, SendLen, 0);
 	if(SendRes == SOCKET_ERROR){

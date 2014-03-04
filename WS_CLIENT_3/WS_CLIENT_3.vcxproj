@@ -39,6 +39,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>D:\CODE\C\VS2010\WS_CLIENT_3\bin\win32\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)</IntDir>
+    <TargetName>WS_CLIENT_3</TargetName>
+    <ExecutablePath>$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(MSBuildToolsPath32);$(VSInstallDir);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);D:\CODE\C\VS2010\WS_CLIENT_3\bin\win32;D:\CODE\C\VS2010\WS_CLIENT_3\bin\win64;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -50,10 +54,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\CODE\C\VS2010\WS_CLIENT_3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\CODE\C\VS2010\WS_CLIENT_3\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;D:\CODE\C\VS2010\WS_CLIENT_3\lib\win32\uma.lib;D:\CODE\C\VS2010\WS_CLIENT_3\lib\win32\PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,7 +86,7 @@
     <ClCompile Include="http_response.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="post_api_comm.cpp" />
-    <ClCompile Include="post_api_init.cpp" />
+    <ClCompile Include="post_api_login.cpp" />
     <ClCompile Include="post_api_upload.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -88,7 +95,7 @@
     <ClInclude Include="http_request.h" />
     <ClInclude Include="http_response.h" />
     <ClInclude Include="post_api_comm.h" />
-    <ClInclude Include="post_api_init.h" />
+    <ClInclude Include="post_api_login.h" />
     <ClInclude Include="post_api_upload.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

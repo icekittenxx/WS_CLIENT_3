@@ -1,13 +1,13 @@
-#include "post_api_init.h"
+#include "post_api_login.h"
 
-int post_api_init(const char *IpAddress, u_short Port, char *SendBuffer){
+int post_api_login(const char *IpAddress, u_short Port, char *SendBuffer, char *UserName, char *Password){
 
-	post_api_init_connect(IpAddress, Port, SendBuffer);
+	post_api_login_connect(IpAddress, Port, SendBuffer, UserName, Password);
 
 	return 0;
 }
 
-int post_api_init_connect(const char *IpAddress, u_short Port, char *SendBuffer){
+int post_api_login_connect(const char *IpAddress, u_short Port, char *SendBuffer, char *UserName, char *Password){
 	WSADATA  Ws;
 	SOCKET ClientSocket;
 	HANDLE hThread = NULL;
@@ -34,7 +34,7 @@ int post_api_init_connect(const char *IpAddress, u_short Port, char *SendBuffer)
 		return -1;
 	}
 
-	Ret = post_api_init_communcation(ClientSocket, IpAddress, Port, SendBuffer);
+	Ret = post_api_login_communcation(ClientSocket, IpAddress, Port, SendBuffer, UserName, Password);
 	if(Ret == -1){
 		return -1;
 	}
@@ -44,7 +44,7 @@ int post_api_init_connect(const char *IpAddress, u_short Port, char *SendBuffer)
 	return 0;
 }
 
-int post_api_init_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer){
+int post_api_login_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer, char *UserName, char *Password){
 	//char *SendBuffer, *RecvBuffer;
 	char RecvBuffer[SOCKET_MAX_BUF];
 	int SendRes = 0, RecvRes = 0;
@@ -52,7 +52,7 @@ int post_api_init_communcation(SOCKET ClientSocket, const char *IpAddress, u_sho
 	int RecvBufferIsEmpty = 0;
 	int ParseRes = 0;
 
-	construct_http(IpAddress, Port, POST_API_ACTION_INIT, SendBuffer, NULL, NULL);
+	construct_http(IpAddress, Port, POST_API_ACTION_INIT, SendBuffer, UserName, Password, NULL, NULL, NULL);
 
 	SendRes = send(ClientSocket, SendBuffer, SendLen, 0);
 	if(SendRes == SOCKET_ERROR){
@@ -72,7 +72,7 @@ int post_api_init_communcation(SOCKET ClientSocket, const char *IpAddress, u_sho
 		}
 
 		if(RecvBufferIsEmpty == 0){
-			ParseRes = ParseRecvBuffer(RecvBuffer, POST_API_ACTION_INIT);
+			ParseRes = ParseRecvBuffer(RecvBuffer, POST_API_ACTION_LOGIN);
 			if(ParseRes != -1){
 				//undo
 			}

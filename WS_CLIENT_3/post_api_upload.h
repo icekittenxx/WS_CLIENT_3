@@ -11,8 +11,8 @@ const char EmlSuffix[] = "*.eml";
 const char BakFile[] = "copy.txt";
 
 int post_api_upload(const char *IpAddress, u_short Port, char *SendBuffer);
-int post_api_upload_connect(const char *IpAddress, u_short Port, char *SendBuffer, char *FilePathName, int UPLOAD_TYPE);
-int post_api_upload_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer, char *FilePathName, int UPLOAD_TYPE);
+int post_api_upload_connect(const char *IpAddress, u_short Port, char *SendBuffer, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE);
+int post_api_upload_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE);
 
 int get_current_path(char *CurrentPath);
 int get_find_file_class(char *CurrentPath, char *FindFileClass);
