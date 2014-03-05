@@ -1,5 +1,6 @@
 #include "http_request.h"
 
+/*
 #include <uma/bson/Object.h>
 #include <uma/bson/ODMObject.h>
 #include <uma/bson/Document.h>
@@ -11,6 +12,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+*/
 
 using uma::bson::Object;
 using uma::bson::ODMObject;
@@ -42,7 +44,7 @@ int construct_http_header(const char *IpAddress, u_short Port, int PostAction, c
 	sprintf(HttpContentLenString, "%d", HttpContentLen);
 
 	switch(PostAction){
-	case POST_API_ACTION_INIT:
+	case POST_API_ACTION_LOGIN:
 		strcat(HttpHeader, "POST /api/login");
 		break;
 	case POST_API_ACTION_UPLOAD:
@@ -79,39 +81,47 @@ int construct_http_header(const char *IpAddress, u_short Port, int PostAction, c
 
 int construct_http_content(int PostAction, char *SendBuffer, char *UserName, char *Password, char *FilePath, char *FilePathAndFileName, int UPLOAD_TYPE){
 	char DEVID[MARK_MAX_BUF], SIG[MARK_MAX_BUF];
+	//char VER_STRING[MARK_MAX_BUF], SOURCE_STRING[MARK_MAX_BUF], NONCE_STRING[MARK_MAX_BUF], ACTION_STRING[MARK_MAX_BUF];
 	int VER, SOURCE, NONCE, ACTION;
+	char SECRETKEY[MARK_MAX_BUF];
 
-	using std::cout;
-	using std::endl;
+	memset(DEVID, 0x00, sizeof DEVID);
+	memset(SIG, 0x00, sizeof SIG);
+	memset(SECRETKEY, 0x00, sizeof SECRETKEY);
+
+	sprintf(DEVID, "%s", "550e8400-e29b-41d4-a716-446655440000");
+	VER = 6;
+	SOURCE = 21;
+	ACTION = PostAction;
+	NONCE = get_nonce();
+	sprintf(SECRETKEY, "%s", "8YRIJ41NK9PLOT6");
+
+	get_sig(SIG, DEVID, VER, SOURCE, ACTION, NONCE, SECRETKEY);
+
 	using std::string;
-
-	using std::ostream;
-	using std::filebuf;
 	using std::ostringstream;
-	using std::stringstream;
-	using std::iostream;
 	
-	uma::bson::Document http_content;
-	uma::bson::Document bson_email_data;
+	uma::bson::Document HttpContent;
+	uma::bson::Document BsonEmailData;
 
-	http_content.set("devid", (string)DEVID);
-	http_content.set("ver", VER);
-	http_content.set("source", SOURCE);
-	http_content.set("action", ACTION);
-	http_content.set("nonce", NONCE);
-	http_content.set("sig", (string)SIG);
+	HttpContent.set("devid", (string)DEVID);
+	HttpContent.set("ver", VER);
+	HttpContent.set("source", SOURCE);
+	HttpContent.set("action", ACTION);
+	HttpContent.set("nonce", NONCE);
+	HttpContent.set("sig", (string)SIG);
 
 	switch(PostAction){
 	case POST_API_ACTION_INIT:
-		http_content.set("username", (string)UserName);
-		http_content.set("password", (string)Password);
+		HttpContent.set("username", (string)UserName);
+		HttpContent.set("password", (string)Password);
 		break;
 	case POST_API_ACTION_UPLOAD:
 		construct_http_content_upload(SendBuffer, FilePathAndFileName);
 
-		bson_email_data.set("folder", (string)FilePath);
-		bson_email_data.set("content", (string)SendBuffer);
-		http_content.set("data", bson_email_data);
+		BsonEmailData.set("folder", (string)FilePath);
+		BsonEmailData.set("content", (string)SendBuffer);
+		HttpContent.set("data", BsonEmailData);
 		
 		break;
 	case POST_API_ACTION_COMM:
@@ -124,17 +134,17 @@ int construct_http_content(int PostAction, char *SendBuffer, char *UserName, cha
 		break;
 	}
 
-	ostringstream stream_buf;
-	http_content.toBson(stream_buf);
-	string string_buf;
-	string_buf = stream_buf.str();
-	int buf_len;
-	buf_len = string_buf.size();
+	ostringstream StreamBuf;
+	HttpContent.toBson(StreamBuf);
+	string StringBuf;
+	StringBuf = StreamBuf.str();
+	int BufLen;
+	BufLen = StringBuf.size();
 
 	memset(SendBuffer, 0x00, sizeof SendBuffer);
-	memcpy(SendBuffer, string_buf.c_str(), buf_len);
+	memcpy(SendBuffer, StringBuf.c_str(), BufLen);
 
-	return buf_len;
+	return BufLen;
 }
 
 int construct_http_content_upload(char *SendBuffer, char *FilePathAndFileName){
@@ -153,6 +163,41 @@ int construct_http_content_upload(char *SendBuffer, char *FilePathAndFileName){
 			return 0;
 		}
 	}
+}
+
+int get_nonce(){
+	return 1;
+}
+
+int get_sig(char *Sig, char *Devid, int Ver, int Source, int Action, int Nonce, char *SecretKey){
+	char VerString[MARK_MAX_BUF], SourceString[MARK_MAX_BUF], NonceString[MARK_MAX_BUF], ActionString[MARK_MAX_BUF];
+	char TempString[MARK_MAX_BUF];
+	int Len = 0;
+
+	int i = 0;
+
+	memset(TempString, 0x00, sizeof TempString);
+	memset(VerString, 0x00, sizeof VerString);
+	memset(SourceString, 0x00, sizeof SourceString);
+	memset(NonceString, 0x00, sizeof NonceString);
+	memset(ActionString, 0x00, sizeof ActionString);
+
+	sprintf(VerString, "%d", Ver);
+	sprintf(SourceString, "%d", Source);
+	sprintf(ActionString, "%d", Action);
+	sprintf(NonceString, "%d", Nonce);
+
+	strcat(TempString, Devid);
+	strcat(TempString, VerString);
+	strcat(TempString, SourceString);
+	strcat(TempString, ActionString);
+	strcat(TempString, NonceString);
+	strcat(TempString, SecretKey);
+
+	MD5Digest(TempString, strlen(TempString), Sig);
+	Len = strlen(Sig);
+
+	return Len;
 }
 
 /*

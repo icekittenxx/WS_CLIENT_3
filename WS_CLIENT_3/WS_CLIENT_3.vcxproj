@@ -85,6 +85,7 @@
     <ClCompile Include="http_request.cpp" />
     <ClCompile Include="http_response.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="md5.cpp" />
     <ClCompile Include="post_api_comm.cpp" />
     <ClCompile Include="post_api_login.cpp" />
     <ClCompile Include="post_api_upload.cpp" />
@@ -94,6 +95,7 @@
     <ClInclude Include="define.h" />
     <ClInclude Include="http_request.h" />
     <ClInclude Include="http_response.h" />
+    <ClInclude Include="md5.h" />
     <ClInclude Include="post_api_comm.h" />
     <ClInclude Include="post_api_login.h" />
     <ClInclude Include="post_api_upload.h" />

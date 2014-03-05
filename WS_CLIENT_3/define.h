@@ -10,6 +10,18 @@
 #include <sys/stat.h>
 #include <direct.h>
 
+#include <uma/bson/Object.h>
+#include <uma/bson/ODMObject.h>
+#include <uma/bson/Document.h>
+#include <uma/bson/Array.h>
+#include <uma/bson/String.h>
+#include <uma/bson/Integer.h>
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <vector>
+
 #define POST_API_ACTION_INIT 101
 #define POST_API_ACTION_LOGIN 101
 #define POST_API_ACTION_UPLOAD 111

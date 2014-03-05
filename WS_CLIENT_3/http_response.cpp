@@ -1,5 +1,48 @@
 #include "http_response.h"
 
+using uma::bson::Object;
+using uma::bson::ODMObject;
+using uma::bson::Document;
+using uma::bson::Array;
+using uma::bson::String;
+using uma::bson::Integer;
+
+int ParseRecvBuffer(char *RecvBuffer, int PostAction){
+	char TempString[FILE_NAME_LEN];
+	int BufferLen;
+	int ContentStartPos = -1;
+
+	int i = 0;
+
+	BufferLen = strlen(RecvBuffer);
+	for(i = 0; i < BufferLen; i ++){
+		if(i + 8 < BufferLen){
+			memset(TempString, 0x00, sizeof TempString);
+			memcpy(TempString, RecvBuffer + i, 8);
+			if(strcmp(TempString, "\r\n\r\n:") == 0){
+				ContentStartPos = i + 9;
+				break;
+			}
+		}
+	}
+
+	if(ContentStartPos == -1){
+		return -1;
+	}
+	else{
+		using std::string;
+
+		if(PostAction == POST_API_ACTION_LOGIN){
+			Document HttpContent = Document::fromBytes(RecvBuffer + ContentStartPos, BufferLen - ContentStartPos);
+			string UID;
+			UID = HttpContent.get("uid").getValue<String>().getValue();
+		}
+		return 0;
+	}
+}
+/**/
+
+/*
 int ParseRecvBuffer(char *RecvBuffer, int PostAction){
 
 	char ResponseContentAction[SOCKET_MAX_BUF];
@@ -137,3 +180,4 @@ int ParseRecvBuffer(char *RecvBuffer, int PostAction){
 
 	return 1;
 }
+*/
