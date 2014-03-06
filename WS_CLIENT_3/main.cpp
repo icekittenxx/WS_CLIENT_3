@@ -5,8 +5,10 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-char IPAddress[] = "127.0.0.1";
-u_short Port = 80;
+//char IPAddress[] = "127.0.0.1";
+//u_short Port = 80;
+char IPAddress[] = "218.193.154.163";
+u_short Port = 8000;
 char SendBuffer[FILE_MAX_BUF];
 
 int main(){

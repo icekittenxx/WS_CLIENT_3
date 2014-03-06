@@ -34,7 +34,7 @@ int construct_http(const char *IpAddress, u_short Port, int PostAction, char *Se
 	memmove(SendBuffer + HttpHeaderLen, SendBuffer, HttpContentLen);
 	memcpy(SendBuffer, HttpHeader, HttpHeaderLen);
 	
-	return 0;
+	return HttpHeaderLen + HttpContentLen;
 }
 
 int construct_http_header(const char *IpAddress, u_short Port, int PostAction, char *HttpHeader, int HttpContentLen){
@@ -45,7 +45,8 @@ int construct_http_header(const char *IpAddress, u_short Port, int PostAction, c
 
 	switch(PostAction){
 	case POST_API_ACTION_LOGIN:
-		strcat(HttpHeader, "POST /api/login");
+		//strcat(HttpHeader, "POST /api/login");
+		strcat(HttpHeader, "POST /debug");
 		break;
 	case POST_API_ACTION_UPLOAD:
 		strcat(HttpHeader, "POST /api/upload");
@@ -134,8 +135,12 @@ int construct_http_content(int PostAction, char *SendBuffer, char *UserName, cha
 		break;
 	}
 
+	uma::bson::Document test;
+	test["hello"] = "world";
+
 	ostringstream StreamBuf;
-	HttpContent.toBson(StreamBuf);
+	//HttpContent.toBson(StreamBuf);
+	test.toBson(StreamBuf);
 	string StringBuf;
 	StringBuf = StreamBuf.str();
 	int BufLen;
@@ -143,6 +148,16 @@ int construct_http_content(int PostAction, char *SendBuffer, char *UserName, cha
 
 	memset(SendBuffer, 0x00, sizeof SendBuffer);
 	memcpy(SendBuffer, StringBuf.c_str(), BufLen);
+
+	char temp[] = "hello world";
+	for(int i = 0; i < 11; i ++){
+		printf("%2x ", temp);
+	}
+	printf("\n");
+
+	for(int i = 0; i < BufLen; i ++){
+		printf("%2x ", SendBuffer[i]);
+	}
 
 	return BufLen;
 }
@@ -166,7 +181,24 @@ int construct_http_content_upload(char *SendBuffer, char *FilePathAndFileName){
 }
 
 int get_nonce(){
-	return 1;
+	time_t RawTime;
+	struct tm *TimeInfo;
+	int TimeStamp;
+	int RandNum;
+	int Nonce;
+
+	time(&RawTime);
+	TimeInfo = localtime(&RawTime);
+
+	TimeStamp = TimeInfo->tm_sec + TimeInfo->tm_min * 60 + TimeInfo->tm_hour * 60 * 60
+				+ TimeInfo->tm_mday * 60 * 60 * 24 + TimeInfo->tm_mon * 60 * 60 * 24 * 30;
+
+	srand((unsigned int)time(NULL));
+	
+	RandNum = rand() % 100;
+	Nonce = RandNum + TimeStamp;
+
+	return Nonce;
 }
 
 int get_sig(char *Sig, char *Devid, int Ver, int Source, int Action, int Nonce, char *SecretKey){

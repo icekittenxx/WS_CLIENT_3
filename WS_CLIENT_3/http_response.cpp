@@ -6,15 +6,40 @@ using uma::bson::Document;
 using uma::bson::Array;
 using uma::bson::String;
 using uma::bson::Integer;
+using uma::bson::ObjectId;
 
+/*
 int ParseRecvBuffer(char *RecvBuffer, int PostAction){
+	int i = 0;
+	for(int i = 116; i < 138; i ++){
+		printf("%d : %c\n", i, RecvBuffer[i]);
+	}
+	char temp[100];
+	memset(temp, 0x00, sizeof temp);
+	memcpy(temp, RecvBuffer + 116, 22);
+
+	for(int i = 0; i < 22; i ++){
+		printf("%c", temp[i]);
+	}
+	Document HttpContent = Document::fromBytes(RecvBuffer + 116, 22);
+	using std::string;
+	string UID;
+	UID = HttpContent.get("hello").getValue<String>().getValue();
+	using std::cout;
+	cout << UID;
+	HttpContent.toJson(cout);
+	return 1;
+}
+*/
+
+int ParseRecvBuffer(char *RecvBuffer, int RecvLen, int PostAction){
 	char TempString[FILE_NAME_LEN];
 	int BufferLen;
 	int ContentStartPos = -1;
 
 	int i = 0;
-
-	BufferLen = strlen(RecvBuffer);
+	
+	BufferLen = RecvLen;
 	for(i = 0; i < BufferLen; i ++){
 		if(i + 8 < BufferLen){
 			memset(TempString, 0x00, sizeof TempString);
@@ -34,9 +59,15 @@ int ParseRecvBuffer(char *RecvBuffer, int PostAction){
 
 		if(PostAction == POST_API_ACTION_LOGIN){
 			Document HttpContent = Document::fromBytes(RecvBuffer + ContentStartPos, BufferLen - ContentStartPos);
-			string UID;
-			UID = HttpContent.get("uid").getValue<String>().getValue();
+			char UID[20];
+			HttpContent.get("uid").getValue<ObjectId>().getBytes(UID, 12);
 		}
+
+		Document HttpContent = Document::fromBytes(RecvBuffer + ContentStartPos, BufferLen - ContentStartPos);
+		int error;
+		error = HttpContent.get("error").getValue<Integer>().getValue();
+		printf("%d\n", error);
+
 		return 0;
 	}
 }

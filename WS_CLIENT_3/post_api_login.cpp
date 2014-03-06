@@ -52,8 +52,8 @@ int post_api_login_communcation(SOCKET ClientSocket, const char *IpAddress, u_sh
 	int RecvBufferIsEmpty = 0;
 	int ParseRes = 0;
 
-	construct_http(IpAddress, Port, POST_API_ACTION_INIT, SendBuffer, UserName, Password, NULL, NULL, NULL);
-
+	SendLen = construct_http(IpAddress, Port, POST_API_ACTION_LOGIN, SendBuffer, UserName, Password, NULL, NULL, NULL);
+	
 	SendRes = send(ClientSocket, SendBuffer, SendLen, 0);
 	if(SendRes == SOCKET_ERROR){
 		return -1;
@@ -70,15 +70,13 @@ int post_api_login_communcation(SOCKET ClientSocket, const char *IpAddress, u_sh
 		if((int)strlen(RecvBuffer) != 0){
 			RecvBufferIsEmpty = 0;
 		}
-
 		if(RecvBufferIsEmpty == 0){
-			ParseRes = ParseRecvBuffer(RecvBuffer, POST_API_ACTION_LOGIN);
+			ParseRes = ParseRecvBuffer(RecvBuffer, RecvRes, POST_API_ACTION_LOGIN);
 			if(ParseRes != -1){
 				//undo
 			}
 		}
 	}
-
 	//undo
 	return 1; 
 }

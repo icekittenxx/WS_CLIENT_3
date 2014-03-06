@@ -4,6 +4,6 @@
 #include "define.h"
 #include "bson_parser.h"
 
-int ParseRecvBuffer(char *RecvBuffer, int PostAction);
+int ParseRecvBuffer(char *RecvBuffer, int RecvLen, int PostAction);
 
 #endif // __HTTP_REPONSE__
