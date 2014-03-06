@@ -9,8 +9,8 @@
 
 //char IPAddress[] = "127.0.0.1";
 //u_short Port = 80;
-char IPAddress[] = "218.193.154.163";
-u_short Port = 8000;
+char IPAddress[] = "218.193.154.30";
+u_short Port = 8888;
 char SendBuffer[FILE_MAX_BUF];
 
 /*
@@ -39,6 +39,7 @@ int main(int argc, char * argv[]){
 	int Optchar;
 
 	post_api_login(IPAddress, Port, SendBuffer, "test", "test");
+	system("pause");
 
 	while((Optchar = getopt (argc, argv,  "a:u", Optind)) != -1){
 

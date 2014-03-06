@@ -44,6 +44,12 @@ int post_api_login_connect(const char *IpAddress, u_short Port, char *SendBuffer
 	return 0;
 }
 
+void debug_print(char *Buf, int Len){
+	for(int i = 0; i < Len; i ++){
+		printf("%c", Buf[i]);
+	}
+}
+
 int post_api_login_communcation(SOCKET ClientSocket, const char *IpAddress, u_short Port, char *SendBuffer, char *UserName, char *Password){
 	//char *SendBuffer, *RecvBuffer;
 	char RecvBuffer[SOCKET_MAX_BUF];
@@ -52,7 +58,10 @@ int post_api_login_communcation(SOCKET ClientSocket, const char *IpAddress, u_sh
 	int RecvBufferIsEmpty = 0;
 	int ParseRes = 0;
 
+	printf("start communication\n");
 	SendLen = construct_http(IpAddress, Port, POST_API_ACTION_LOGIN, SendBuffer, UserName, Password, NULL, NULL, NULL);
+
+	debug_print(SendBuffer, SendLen);
 	
 	SendRes = send(ClientSocket, SendBuffer, SendLen, 0);
 	if(SendRes == SOCKET_ERROR){
@@ -66,12 +75,12 @@ int post_api_login_communcation(SOCKET ClientSocket, const char *IpAddress, u_sh
 		if(RecvRes == 0 || RecvRes == SOCKET_ERROR){
 			break;
 		}
-
 		if((int)strlen(RecvBuffer) != 0){
 			RecvBufferIsEmpty = 0;
 		}
 		if(RecvBufferIsEmpty == 0){
 			ParseRes = ParseRecvBuffer(RecvBuffer, RecvRes, POST_API_ACTION_LOGIN);
+			debug_print(RecvBuffer, RecvRes);
 			if(ParseRes != -1){
 				//undo
 			}

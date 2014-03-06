@@ -135,12 +135,14 @@ int construct_http_content(int PostAction, char *SendBuffer, char *UserName, cha
 		break;
 	}
 
+	/*
 	uma::bson::Document test;
 	test["hello"] = "world";
-
 	ostringstream StreamBuf;
-	//HttpContent.toBson(StreamBuf);
 	test.toBson(StreamBuf);
+	*/
+	ostringstream StreamBuf;
+	HttpContent.toBson(StreamBuf);
 	string StringBuf;
 	StringBuf = StreamBuf.str();
 	int BufLen;
@@ -148,16 +150,6 @@ int construct_http_content(int PostAction, char *SendBuffer, char *UserName, cha
 
 	memset(SendBuffer, 0x00, sizeof SendBuffer);
 	memcpy(SendBuffer, StringBuf.c_str(), BufLen);
-
-	char temp[] = "hello world";
-	for(int i = 0; i < 11; i ++){
-		printf("%2x ", temp);
-	}
-	printf("\n");
-
-	for(int i = 0; i < BufLen; i ++){
-		printf("%2x ", SendBuffer[i]);
-	}
 
 	return BufLen;
 }
