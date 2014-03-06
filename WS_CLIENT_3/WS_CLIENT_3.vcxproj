@@ -82,6 +82,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bson_parser.cpp" />
+    <ClCompile Include="getopt.cpp" />
     <ClCompile Include="http_request.cpp" />
     <ClCompile Include="http_response.cpp" />
     <ClCompile Include="main.cpp" />
@@ -93,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="bson_parser.h" />
     <ClInclude Include="define.h" />
+    <ClInclude Include="getopt.h" />
     <ClInclude Include="http_request.h" />
     <ClInclude Include="http_response.h" />
     <ClInclude Include="md5.h" />

@@ -61,7 +61,7 @@ int post_api_comm_communcation(SOCKET ClientSocket, const char *IpAddress, u_sho
 		}
 
 		if(RecvBufferIsEmpty == 0){
-			ParseRes = ParseRecvBuffer(RecvBuffer, POST_API_ACTION_COMM);
+			ParseRes = ParseRecvBuffer(RecvBuffer, RecvRes, POST_API_ACTION_COMM);
 			if(ParseRes != -1){
 				// undo
 			}

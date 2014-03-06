@@ -3,6 +3,8 @@
 #include "post_api_login.h"
 #include "post_api_upload.h"
 
+#include "getopt.h"
+
 #pragma comment(lib, "ws2_32.lib")
 
 //char IPAddress[] = "127.0.0.1";
@@ -11,6 +13,7 @@ char IPAddress[] = "218.193.154.163";
 u_short Port = 8000;
 char SendBuffer[FILE_MAX_BUF];
 
+/*
 int main(){
 	int CommandId = 0;
 
@@ -27,5 +30,29 @@ int main(){
 		}
 	}
 
+	return 0;
+}
+*/
+
+int main(int argc, char * argv[]){
+	int Optind = 1;
+	int Optchar;
+
+	post_api_login(IPAddress, Port, SendBuffer, "test", "test");
+
+	while((Optchar = getopt (argc, argv,  "a:u", Optind)) != -1){
+
+		switch(Optchar){
+		case 'a':
+			post_api_upload(IPAddress, Port, SendBuffer, Optchar, argv[Optind + 1], argv[Optind + 2]);
+			break;
+		case 'u':
+			post_api_upload(IPAddress, Port, SendBuffer, Optchar, argv[Optind + 1], argv[Optind + 2]);
+			break;
+		default:
+			printf("h\n");
+			break;
+		}
+	}
 	return 0;
 }

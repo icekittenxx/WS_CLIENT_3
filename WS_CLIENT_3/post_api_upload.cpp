@@ -1,27 +1,65 @@
 #include "post_api_upload.h"
 
-int post_api_upload(const char *IpAddress, u_short Port, char *SendBuffer){
+int post_api_upload(const char *IpAddress, u_short Port, char *SendBuffer, char Command, char *Path, char *Folder){
 	FILE *PP;
-	struct _finddata_t FindFile;
-	long FHandle;
-	char CurrentPath[FILE_NAME_LEN];
-	int CurrentPathLen = 0;
+	
+	//char CurrentPath[FILE_NAME_LEN];
+	//int CurrentPathLen = 0;
+
 	char SendEml[EML_MAX_NUM][FILE_NAME_LEN];
 	int SendEmlNum;
 	
-	memset(CurrentPath, 0x00, sizeof CurrentPath);
+	//memset(CurrentPath, 0x00, sizeof CurrentPath);
+	//CurrentPathLen = get_current_path(CurrentPath);
+
 	memset(SendEml, 0x00, sizeof SendEml);
-	CurrentPathLen = get_current_path(CurrentPath);
-	SendEmlNum = load_already_send_eml(CurrentPath, SendEml);
+	//SendEmlNum = load_already_send_eml(CurrentPath, SendEml);
+	SendEmlNum = load_already_send_eml(Path, SendEml);
 	PP = fopen(BakFile, "w");
 	fclose(PP);
 
-	scan_file(CurrentPath, IpAddress, Port, SendBuffer, SendEml, SendEmlNum);
+	switch(Command){
+	case 'a':
+		post_api_upload_send_file(Path, Folder, IpAddress, Port, SendBuffer, SendEml, SendEmlNum);
+		break;
+	case 'u':
+		post_api_upload_scan_file(Path, Folder, IpAddress, Port, SendBuffer, SendEml, SendEmlNum);
+		break;
+	default:
+		printf("h\n");
+		break;
+	}
+	//post_api_upload_scan_file(CurrentPath, IpAddress, Port, SendBuffer, SendEml, SendEmlNum);
 	
 	return 0;
 }
 
-int scan_file(char *CurrentPath, const char *IpAddress, u_short Port, char *SendBuffer, char SendEml[][FILE_NAME_LEN], int SendEmlNum){
+int post_api_upload_send_file(char *CurrentPath, char *Folder, const char *IpAddress, u_short Port, char *SendBuffer, char SendEml[][FILE_NAME_LEN], int SendEmlNum){
+	FILE *PP;
+	char FileName[FILE_NAME_LEN];
+	char FilePathAndFileName[FILE_NAME_LEN];
+	int Res;
+
+	PP = fopen(BakFile, "a+");
+	memset(FileName, 0x00, sizeof FileName);
+	strcpy(FileName, Folder);
+	fprintf(PP, "%s\n", FileName);
+	fclose(PP);
+
+	Res = find_in_send_eml(Folder, SendEml, SendEmlNum);
+	if(Res == 1){
+		return Res;
+	}
+
+	memset(FilePathAndFileName, 0x00, sizeof FilePathAndFileName);
+	strcat(FilePathAndFileName, CurrentPath);
+	strcat(FilePathAndFileName, Folder);
+
+	Res = post_api_upload_connect(IpAddress, Port, SendBuffer, Folder, FilePathAndFileName, UPLOAD_TYPE_EMAIL);
+	return Res;
+}
+
+int post_api_upload_scan_file(char *CurrentPath, char *Folder, const char *IpAddress, u_short Port, char *SendBuffer, char SendEml[][FILE_NAME_LEN], int SendEmlNum){
 	FILE *PP;
 	struct _finddata_t FindFile;
 	long FHandle;
@@ -46,7 +84,7 @@ int scan_file(char *CurrentPath, const char *IpAddress, u_short Port, char *Send
 			sprintf(CurrentPath_2, "%s", CurrentPath);
 			strcat(CurrentPath_2, "\\");
 			strcat(CurrentPath_2, FindFile.name);
-			scan_file(CurrentPath_2, IpAddress, Port, SendBuffer, SendEml, SendEmlNum);
+			post_api_upload_scan_file(CurrentPath_2, Folder, IpAddress, Port, SendBuffer, SendEml, SendEmlNum);
 		}
 		else if(!(FindFile.attrib & _A_SUBDIR)){
 
@@ -73,11 +111,13 @@ int scan_file(char *CurrentPath, const char *IpAddress, u_short Port, char *Send
 				strcat(FilePathAndFileName, EmlPath);
 				strcat(FilePathAndFileName, FindFile.name);
 
-				Res = post_api_upload_connect(IpAddress, Port, SendBuffer, CurrentPath, FilePathAndFileName, UPLOAD_TYPE_EMAIL);
+				Res = post_api_upload_connect(IpAddress, Port, SendBuffer, Folder, FilePathAndFileName, UPLOAD_TYPE_EMAIL);
 			}
 		}
 	}while(_findnext(FHandle, &FindFile) == 0);
 	_findclose(FHandle);
+
+	return 0;
 }
 
 /*
